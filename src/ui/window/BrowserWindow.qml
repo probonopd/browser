@@ -38,30 +38,45 @@ ApplicationWindow {
     property var root
     property WebProfile profile
     property bool incognito: profile.incognito
-    property url startUrl: {
-        if (incognito)
-            return Settings.startConfig.incognitoStartUrl;
-        else if (darkThemeActive)
-            return Settings.startConfig.darkStartUrl;
-        else
-            return Settings.startConfig.primaryStartUrl;
-    }
+    property url startUrl: Settings.startConfig.primaryStartUrl
     property string searchUrl: Settings.searchConfig.searchUrl
     property bool openStartUrl: true
-    property bool themeColorEnabled: Settings.themeConfig.themeColorEnabled
-    property bool darkThemeActive: {
-        if (Settings.themeConfig.darkThemeEnabled) {
-            // always on if startTime == endTime (e.g. 00:00 == 00:00)
-            var alwaysOn = (timeString(Settings.themeConfig.darkThemeStartTime)
-                            === timeString(Settings.themeConfig.darkThemeEndTime));
-            // dark theme active if either always on or current time in
-            // active time span configured in the settings
-            return alwaysOn || DarkThemeTimer.isActiveTime;
-        }
-        return false;
-    }
     property TabsModel tabsModel: TabsModel {}
     property DownloadsModel downloadsModel
+
+    property bool websiteThemeActive: (!tabsModel.active.invalid
+                                       && tabsModel.active.hasThemeColor
+                                       && Theme.current.adaptWebsiteTheme)
+
+    property color backgroundColor: {
+        if (incognito) {
+            return IncognitoTheme.current.background;
+        } else if (websiteThemeActive) {
+            return tabsModel.active.themeColor;
+        } else {
+            return Theme.current.background;
+        }
+    }
+
+    property color foregroundColor: {
+        if (incognito) {
+            return IncognitoTheme.current.foreground;
+        } else if (websiteThemeActive) {
+            return Utils.lightDark(backgroundColor, "#212121", "white");
+        } else {
+            return Theme.current.foreground;
+        }
+    }
+
+    property color indicatorColor: {
+        if (incognito) {
+            return IncognitoTheme.current.accent;
+        } else if (websiteThemeActive) {
+            return Utils.lightDark(backgroundColor, Theme.current.accent, "white");
+        } else {
+            return Theme.current.accent;
+        }
+    }
 
     property TabController tabController: TabController {
         id: tabController
@@ -91,44 +106,21 @@ ApplicationWindow {
                                                                     : tabsModel.active.title || "New tab")
                                  .arg(incognito ? "(Private mode)" : "")
 
-    Material.theme: darkThemeActive || incognito ? Material.Dark : Material.Light
+    Material.theme: Theme.current.dark || (incognito && IncognitoTheme.current.dark ) ? Material.Dark : Material.Light
+    Material.primary: Theme.current.primary
+    Material.accent: Theme.current.accent
 
     // Header
     header: ToolBar {
         id: toolbarContainer
-
-        property color incognitoColor: "#263238"
-        property color darkThemeColor: "#212121"
-
-        property color backgroundColor: {
-            if (incognito) {
-                return incognitoColor;
-            }
-            else if (darkThemeActive) {
-                return darkThemeColor
-            }
-            else if (!tabsModel.active.invalid && tabsModel.active.hasThemeColor && themeColorEnabled) {
-                return tabsModel.active.themeColor;
-            }
-            else {
-                return "white";
-            }
-        }
-        property color foregroundColor: Utils.lightDark(backgroundColor, "#212121", "white")
-        property color accentColor: Utils.lightDark(backgroundColor, defaultAccentColor, "white")
-        property color defaultAccentColor: Material.color(Material.Pink)
 
         Layout.fillWidth: true
         Material.elevation: 0
         Material.primary: backgroundColor
         Material.background: backgroundColor
         Material.foreground: foregroundColor
-        Material.accent: accentColor
+        Material.accent: Theme.current.accent
         z: 5
-
-        Behavior on backgroundColor {
-            ColorAnimation { duration: 100 }
-        }
 
         ColumnLayout {
             id: headColumn
@@ -143,6 +135,7 @@ ApplicationWindow {
                 tabController: tabController
                 tabsModel: tabController.tabsModel
                 newTabUrl: startUrl
+                indicatorColor: window.indicatorColor
             }
 
             Toolbar {
@@ -153,6 +146,7 @@ ApplicationWindow {
                 tabController: tabController
                 tabsModel: tabController.tabsModel
                 searchUrl: window.searchUrl
+
                 leftActions: [
                     Action {
                         iconName: "navigation/arrow_back"
@@ -332,6 +326,20 @@ ApplicationWindow {
             }
         }
 
+        MenuItem {
+            text: "Extensions"
+            onClicked: {
+                tabController.openUrl("liri://extensions");
+            }
+        }
+
+        MenuItem {
+            text: "About"
+            onClicked: {
+                tabController.openUrl("liri://about");
+            }
+        }
+
         Connections {
             target: tabController.tabsModel
             onEmptyChanged: {
@@ -350,6 +358,10 @@ ApplicationWindow {
                     toolbarActionsOverflowMenu.close();
             }
         }
+    }
+
+    Behavior on backgroundColor {
+        ColorAnimation { duration: 100 }
     }
 
     Connections {
