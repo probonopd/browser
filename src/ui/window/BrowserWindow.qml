@@ -328,6 +328,7 @@ ApplicationWindow {
 
         MenuItem {
             text: "Extensions"
+            iconName: "action/extension"
             onClicked: {
                 tabController.openUrl("liri://extensions");
             }
@@ -335,6 +336,7 @@ ApplicationWindow {
 
         MenuItem {
             text: "About"
+            iconName: "action/info_outline"
             onClicked: {
                 tabController.openUrl("liri://about");
             }
