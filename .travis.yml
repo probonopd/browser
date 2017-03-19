@@ -14,6 +14,7 @@ install:
 script:
   - git clone -b develop https://github.com/lirios/fluid
   - cd fluid
+  - git submodule update --init
   - mkdir build
   - cd build
   - qmake PREFIX=/usr CONFIG+=use_qt_paths ..
