@@ -18,7 +18,7 @@ script:
   - git submodule update --init
   - mkdir build
   - cd build
-  - qmake PREFIX=/usr CONFIG+=use_qt_paths ..
+  - qmake PREFIX=/usr ..
   - make -j4
   - sudo make install
   - sudo make INSTALL_ROOT=../../appdir install ; sudo chown -R $USER ../../appdir ; find ../../appdir/
@@ -32,7 +32,7 @@ script:
   - cd ../
   - mkdir build
   - cd build
-  - qmake PREFIX=/usr CONFIG+=use_qt_paths CONFIG+=QTWEBENGINE_ENABLED ..
+  - qmake PREFIX=/usr CONFIG+=QTWEBENGINE_ENABLED ..
   - make -j4
   - sudo make INSTALL_ROOT=../appdir install ; sudo chown -R $USER ../appdir ; find ../appdir/
   - cd ../
