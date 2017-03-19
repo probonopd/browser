@@ -19,6 +19,7 @@ The following modules and their dependencies are required:
 * [Fluid](https://github.com/lirios/fluid) from develop branch
 * [SlimeEngine](https://github.com/tim-sueberkrueb/slime-engine)
     * with either [Oxide](https://launchpad.net/oxide) or [QtWebEngine](http://code.qt.io/cgit/qt/qtwebengine.git/)
+* [quazip](http://quazip.sourceforge.net/)
 
 ## Build
 
@@ -47,6 +48,10 @@ set the `PREFIX` environment variable when running `qmake`. For example:
 ```sh
 PREFIX=/opt qmake ..
 ```
+
+## Credits
+Many thanks to ...
+* [Corbin Crutchley](https://github.com/crutchcorn) for creating the application icon
 
 ## Licensing
 Licensed under the terms of the GNU General Public License version 3 or, at your option, any later version.
